@@ -237,7 +237,8 @@ class Controller(NotifierMixin, _base.Controller):
         # If the key has a virtual key code, use that immediately with
         # fake_input; fake input,being an X server extension, has access to more
         # internal state that we
-        if key.vk is not None:
+        if True:
+            #key.vk is not None:
             with display_manager(self._display) as dm:
                 Xlib.ext.xtest.fake_input(
                     dm,
