@@ -239,7 +239,8 @@ class Controller(NotifierMixin, _base.Controller):
         # internal state that we
         if True:
             #key.vk is not None:
-            with display_manager(self._display) as dm:
+            with self._display as dm:
+                #display_manager(self._display) as dm:
                 Xlib.ext.xtest.fake_input(
                     dm,
                     Xlib.X.KeyPress if is_press else Xlib.X.KeyRelease,
