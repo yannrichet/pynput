@@ -237,10 +237,8 @@ class Controller(NotifierMixin, _base.Controller):
         # If the key has a virtual key code, use that immediately with
         # fake_input; fake input,being an X server extension, has access to more
         # internal state that we
-        if True:
-            #key.vk is not None:
-            with self._display as dm:
-                #display_manager(self._display) as dm:
+        if key.vk is not None:
+            with display_manager(self._display) as dm:
                 Xlib.ext.xtest.fake_input(
                     dm,
                     Xlib.X.KeyPress if is_press else Xlib.X.KeyRelease,
@@ -249,19 +247,24 @@ class Controller(NotifierMixin, _base.Controller):
         # Otherwise use XSendEvent; we need to use this in the general case to
         # work around problems with keyboard layouts
         else:
-            try:
-                keycode, shift_state = self.keyboard_mapping[keysym]
-                self._send_key(event, keycode, shift_state)
-
-            except KeyError:
-                with self._borrow_lock:
-                    keycode, index, count = self._borrows[keysym]
-                    self._send_key(
-                        event,
-                        keycode,
-                        index_to_shift(self._display, index))
-                    count += 1 if is_press else -1
-                    self._borrows[keysym] = (keycode, index, count)
+            with display_manager(self._display) as dm:
+                Xlib.ext.xtest.fake_input(
+                    dm,
+                    Xlib.X.KeyPress if is_press else Xlib.X.KeyRelease,
+                    dm.keysym_to_keycode(keysym))
+#            try:
+#                keycode, shift_state = self.keyboard_mapping[keysym]
+#                self._send_key(event, keycode, shift_state)
+#
+#            except KeyError:
+#                with self._borrow_lock:
+#                    keycode, index, count = self._borrows[keysym]
+#                    self._send_key(
+#                        event,
+#                        keycode,
+#                        index_to_shift(self._display, index))
+#                    count += 1 if is_press else -1
+#                    self._borrows[keysym] = (keycode, index, count)
 
         # Notify any running listeners
         self._emit('_on_fake_event', key, is_press)
